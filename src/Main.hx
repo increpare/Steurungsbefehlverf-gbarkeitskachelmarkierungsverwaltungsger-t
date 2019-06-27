@@ -51,7 +51,7 @@ class Main {
         }
     }
 
-	var posses = [[1,1],[1,2],[2,1],[2,2]];
+	var posses = [[1,1],[2,1],[1,2],[2,2]];
 
 	function setup(){
 		Gfx.clearcolor = Col.TRANSPARENT;
@@ -166,18 +166,26 @@ class Main {
 	function versuchUndo(){
 		if (undostack.length==0){
 			//BEEP undostack leer
+			playSound(87258501);
 			return;
 		}
 	 	posses = undostack.pop();
 		 //BEEP rückgängig SFX
+		playSound(33877306);
+
 	}
 	function druck(farbe:Int,richtung:Int){
+		if (gewonnen){
+			return;
+		}
+		
 		if (farbe==4){
 			versuchUndo();
 			return;
 		}
 		if (kannsteueren(richtung)==false){
 			//BEEP (nicht besetzt)
+			playSound(80459702);
 			return;
 		}
 		var posseskopie = deepCopy(posses);
@@ -188,21 +196,26 @@ class Main {
 		var ty = py+deltas[richtung][1];
 		if (tx<0||tx>3 || ty<0||ty>3){
 			//BEEP (out of bounds)
+			playSound(87258501);
 			return;
 		} 
 
 		if (PosAt(tx,ty)>=0){
 			//BEEP collision
+			playSound(87258501);
 			return;
 		}
 
 		p[0]=tx;
 		p[1]=ty;
 
-		//BEEP erfolgereiche bewegung
 
 		undostack.push(posseskopie);
 		checkSolve();
+		if (gewonnen==false){
+			//BEEP erfolgereiche bewegung
+			playSound(64651507);
+		}
 	}
 	
 	var targetposses = [
@@ -223,7 +236,8 @@ class Main {
 			}
 		}
 		gewonnen=true;
-		//BEEP
+		//BEEP gewonnen
+		playSound(4825303);
 	}
 
 	function update() {	
@@ -272,14 +286,22 @@ class Main {
 				) {
 					an=!an;
 					if (an){
-						posses = [[1,1],[1,2],[2,1],[2,2]];
+						//BEEP Gerät an
+						playSound(92116105);
+						posses = [[1,1],[2,1],[1,2],[2,2]];
 						gewonnen=false;
 						undostack=[];
+					} else {
+						//BEEP Gerät aus
+						playSound(91834509);
 					}
 				}
 		} else if (!Mouse.leftheld()){
-			target_farbe=-1;
-			target_richtung=-1;
+			if (target_farbe>=0){
+				target_farbe=-1;
+				target_richtung=-1;
+				//BEEP taste auf
+			}
 		}
 
 
